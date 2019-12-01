@@ -12,7 +12,7 @@ var sum = 0;
 // outside the scope of this calculation.
 
 modules.forEach(module => {
-    let fuel = parseInt(module);
+    let fuel = parseInt(module,10);
     while(true) {
         fuel = Math.floor(fuel/3) - 2;
         if (fuel > 0) sum += fuel;
