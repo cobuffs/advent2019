@@ -96,30 +96,3 @@ function runprog(program) {
 
     }
 }
-
-
-// for(var i = 0;i < instructions.length; i = i+4) {
-//     var instruction = parseInt(testops[i],10);
-//     let index1 = parseInt(testops[i+1],10);
-//     let index2 = parseInt(testops[i+2],10);
-//     let destination = parseInt(testops[i+3],10);
-//     if(instruction === 1) {
-//         //add
-//         testops[destination] = testops[index1] + testops[index2];
-//     } else if(instruction === 2) {
-//         //multiple
-//         testops[destination] = testops[index1] * testops[index2];
-//     } else if(instruction === 3) {
-//         instructions[index1] = 
-//     }
-//     else if(instruction == 99) {
-//         //end
-//         if(testops[0] === 19690720) {
-//             console.log(100*noun+verb);
-//             done = true;
-//         }
-//         break;
-//     } else {
-//         console.log("problem");
-//     }
-// }
