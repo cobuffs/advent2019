@@ -47,7 +47,7 @@ for(var i = 0; i < imagelayers.length; i++) {
 
 let check = countforlayer(imagelayers[layern], 1) * countforlayer(imagelayers[layern], 2);
 
-console.log(`zero count ${minZero} in layer ${layern}. p1 is ${check}`);
+console.log(`zero count ${minZero} in layer ${layern}. p1 is ${check}\r\n`);
 printlayer(buildpicture());
 
 function countforlayer(layer, n) {
@@ -89,8 +89,8 @@ function printlayer(layer) {
         for(var j = 0; j < layer[i].length; j++) {
             output = output+layer[i][j];
         }
-        output = output + '\n\r'
+        output = output + '\r\n'
     }
-    output = output + '\n\r'
+    output = output + '\r\n'
     console.log(output);
 }
