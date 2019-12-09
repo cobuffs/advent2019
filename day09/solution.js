@@ -32,10 +32,8 @@ function runprog(program, inputs, programpointer) {
                 param2v = getvalue(param2mode, param2, program, relativebase);
                 sum = param1v + param2v;
                 param3 = program[++i];
-                //if(param3 > program.length) growprogram(program, param3);
                 if(param3mode === 1) program[param3] = sum;
                 else program[getindex(param3mode, param3, program, relativebase)] = sum;
-                //program[param3] = sum;
                 i++;
                 break;
             case 2:
@@ -46,7 +44,6 @@ function runprog(program, inputs, programpointer) {
                 param2v = getvalue(param2mode, param2, program, relativebase);
                 product = param1v * param2v;
                 param3 = program[++i];
-                //program[param3] = product;
                 if(param3mode === 1) program[param3] = product;
                 else program[getindex(param3mode, param3, program, relativebase)] = product;
                 i++;
@@ -87,10 +84,8 @@ function runprog(program, inputs, programpointer) {
             case 6:
                 //if the first parameter is zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
                 param1 = program[++i];
-                //param1v = param1mode === 0 ? program[param1] : param1;
                 param1v = getvalue(param1mode, param1, program, relativebase);
                 param2 = program[++i];
-                //param2v = param2mode === 0 ? program[param2] : param2;
                 param2v = getvalue(param2mode, param2, program, relativebase);
                 if(param1v === 0) i = param2v;
                 else i++;
@@ -112,8 +107,6 @@ function runprog(program, inputs, programpointer) {
                 param2 = program[++i];
                 param2v = getvalue(param2mode, param2, program, relativebase);
                 param3 = program[++i];
-                //if(param3 > program.length) growprogram(program, param3);
-                //program[param3] = param1v === param2v ? 1 : 0;                
                 if(param3mode === 1) program[param3] = param1v === param2v ? 1 : 0;  
                 else program[getindex(param3mode, param3, program, relativebase)] = param1v === param2v ? 1 : 0; 
                 i++;
@@ -121,7 +114,6 @@ function runprog(program, inputs, programpointer) {
             case 9:
                 //opcode 9 adjusts the relative base by the value of its only parameter. The relative base increases (or decreases, if the value is negative) by the value of the parameter.
                 param1 = program[++i];
-                //relativebase += param1;
                 switch(param1mode) {
                     case 0:
                         if(param1 > program.length) growprogram(program, param1);
@@ -139,7 +131,6 @@ function runprog(program, inputs, programpointer) {
                 break;
             case 99:
                 terminate = true;
-                //consoleconsole.log("terminated");
                 return {"output": "HALT", "pointer": i};;
                 break;
         }
