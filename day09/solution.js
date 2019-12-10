@@ -133,7 +133,6 @@ function runprog(program, inputs, programpointer) {
                 break;
             case 99:
                 terminate = true;
-                console.log(`Loops: ${loops}`)
                 return {"output": "HALT", "pointer": i};
                 break;
         }
