@@ -10,7 +10,9 @@ function runprog(program, inputs, programpointer) {
     let inputpointer = 0;
     let terminate = false;
     let relativebase = 0;
+    let loops = 0;
     for(var i = programpointer; i < program.length && !terminate;) {
+        loops++;
         let instruction = program[i].toString();
         //ABCDE - DE is 2 digit Opscode, C is mode of 1st param, B mode of 2nd param, A mode 3rd param
         //add 0's until it is 5 digits
@@ -131,7 +133,8 @@ function runprog(program, inputs, programpointer) {
                 break;
             case 99:
                 terminate = true;
-                return {"output": "HALT", "pointer": i};;
+                console.log(`Loops: ${loops}`)
+                return {"output": "HALT", "pointer": i};
                 break;
         }
 
