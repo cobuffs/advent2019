@@ -61,43 +61,6 @@ function reduce(num,den){
 //go around 360 degrees and blow up the closes asteroid to us. when we blow up the 200th asteroid, stop.
 let destroyedasteroids = 0;
 
-while(destroyedasteroids < 200) {
-    //straight up
-    let rise = 0 - base.y;
-    let run = 0;
-    findpointtodestroy(rise,run);
-
-    //go to the right edge
-    for(var i = 0; i + base.x < asteroidbelt.length; i++) {
-        run++;
-        findpointtodestroy(rise,run);
-    }
-
-    //go down the side
-    for(var i = 0; i < asteroidbelt[0].length; i++) {
-        rise++;
-        findpointtodestroy(rise,run);
-    }
-
-    //go across the bottom from right to left
-    for(var i = asteroidbelt.length - 1; i >= 0; i--) {
-        run--;
-        findpointtodestroy(rise,run);
-    }
-
-    //go up the left
-    for(var i = asteroidbelt.length - 1; i >= 0; i++) {
-        rise--
-        findpointtodestroy(rise,run);
-    }
-
-    //get back to the middle
-    for(var i = 0; i < base.x; i++) {
-        run++;
-        findpointtodestroy(rise,run);
-    }
-}
-
 function findpointtodestroy(rise,run) {
     let key = reduce(rise,run);
     //get points on that slope
@@ -123,6 +86,39 @@ function findpointtodestroy(rise,run) {
 function mdistance(x1,y1,x2,y2)
 {
     return Math.abs(x2-x1) + Math.abs(y2-y1);
+}
+
+function builditeratorforlaser() {
+    console.log(base);
+    let quad1 = [];
+    let quad2 = [];
+    let quad3 = [];
+    let quad4 = [];
+
+    //for every slope in the base, decide which quad it belongs to
+    base.slopemap.forEach((k,v) => {
+        //quad 1 - neg y, positive x
+        if(v.rise < 0 && v.run > 0) {
+            quad1.push({"point":k, "rise": rise, "run": run, "slope": rise/run});
+        } else if(v.rise > 0 && v.run > 0) {
+            //quad 2 - positive y, positive x
+            quad2.push({"point":k, "rise": rise, "run": run, "slope": rise/run});
+        } else if(v.rise > 0 && v.run < 0) {
+            //quad 3 - positive y, negative x
+            quad3.push({"point":k, "rise": rise, "run": run, "slope": rise/run});
+        } else if(v.rise < 0 && v1.run < 0) {
+            //quad 4 - neg y, neg x
+            quad4.push({"point":k, "rise": rise, "run": run, "slope": rise/run});
+        }
+    });
+
+    //add edge cases
+    quad1.push({"point":k, "rise": -1, "run": 0, "slope": -100});
+    quad2.push({"point":k, "rise": 0, "run": 1, "slope": 0});
+    quad3.push({"point":k, "rise": 1, "run": 0, "slope": 100});
+    quad4.push({"point":k, "rise": 0, "run": -1, "slope": 0});
+
+    console.log(quad1);
 }
 
 console.log(base.slopemap.size);
