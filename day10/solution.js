@@ -1,5 +1,5 @@
 const fs = require('fs');
-const inputs = fs.readFileSync('input.txt').toString().split("\r\n");
+const inputs = fs.readFileSync('input.txt').toString().split("\n");
 
 let asteroidbelt = new Array();
 let asteroidlocs = new Map();
@@ -21,6 +21,7 @@ for(var y = 0; y < asteroidbelt.length; y++) {
     }
 }
 let base = null;
+
 //for every asteroid, generate the slope to every other asteroid. when the slope is the same, we can start eliminating so that we only see the first one we hit up, down, left or right
 for(var i = 0; i < asteroidkeys.length; i++) {
     let point1 = asteroidkeys[i]
@@ -56,10 +57,26 @@ function reduce(num,den){
     gcd = Math.abs(gcd(num,den));
     return `${num/gcd}, ${den/gcd}`;
 }
-  
+
+function reduce2(num,den){
+    var gcd = function gcd(a,b){
+        return b ? gcd(b, a%b) : a;
+    };
+    gcd = Math.abs(gcd(num,den));
+    return [num/gcd, den/gcd];
+}
 //blow some shit up
 //go around 360 degrees and blow up the closes asteroid to us. when we blow up the 200th asteroid, stop.
 let destroyedasteroids = 0;
+let laserit = builditeratorforlaser();
+let loop = 0;
+    
+while(destroyedasteroids < 200) {
+    let consider = laserit[loop % laserit.length];
+    let reducedrr = reduce2(consider.rise, consider.run);
+    findpointtodestroy(reducedrr[0], reducedrr[1]);
+    loop++;
+}
 
 function findpointtodestroy(rise,run) {
     let key = reduce(rise,run);
@@ -78,7 +95,7 @@ function findpointtodestroy(rise,run) {
             }
         }
         destroyedasteroids++;
-        possibles.splice(index,1);
+        possibles.splice(index,1); 
         console.log(removedpoint);
     }
 }
@@ -89,36 +106,41 @@ function mdistance(x1,y1,x2,y2)
 }
 
 function builditeratorforlaser() {
-    console.log(base);
     let quad1 = [];
     let quad2 = [];
     let quad3 = [];
     let quad4 = [];
+    let laserit = [];
 
     //for every slope in the base, decide which quad it belongs to
-    base.slopemap.forEach((k,v) => {
+    for (var [k, v] of base.slopemap.entries()) {
         //quad 1 - neg y, positive x
         if(v.rise < 0 && v.run > 0) {
-            quad1.push({"point":k, "rise": rise, "run": run, "slope": rise/run});
+            quad1.push({"point":k, "rise": v.rise, "run": v.run, "slope": v.rise/v.run});
         } else if(v.rise > 0 && v.run > 0) {
             //quad 2 - positive y, positive x
-            quad2.push({"point":k, "rise": rise, "run": run, "slope": rise/run});
+            quad2.push({"point":k, "rise": v.rise, "run": v.run, "slope": v.rise/v.run});
         } else if(v.rise > 0 && v.run < 0) {
             //quad 3 - positive y, negative x
-            quad3.push({"point":k, "rise": rise, "run": run, "slope": rise/run});
-        } else if(v.rise < 0 && v1.run < 0) {
+            quad3.push({"point":k, "rise": v.rise, "run": v.run, "slope": v.rise/v.run});
+        } else if(v.rise < 0 && v.run < 0) {
             //quad 4 - neg y, neg x
-            quad4.push({"point":k, "rise": rise, "run": run, "slope": rise/run});
+            quad4.push({"point":k, "rise": v.rise, "run": v.run, "slope": v.rise/v.run});
         }
-    });
+    }
 
     //add edge cases
-    quad1.push({"point":k, "rise": -1, "run": 0, "slope": -100});
-    quad2.push({"point":k, "rise": 0, "run": 1, "slope": 0});
-    quad3.push({"point":k, "rise": 1, "run": 0, "slope": 100});
-    quad4.push({"point":k, "rise": 0, "run": -1, "slope": 0});
+    quad1.push({"point":"0, -1", "rise": -1, "run": 0, "slope": -100});
+    quad2.push({"point":"0, 1", "rise": 0, "run": 1, "slope": 0});
+    quad3.push({"point":"1, 0", "rise": 1, "run": 0, "slope": 100});
+    quad4.push({"point":"-1, 0", "rise": 0, "run": -1, "slope": 0});
 
-    console.log(quad1);
+    quad1.sort((a,b) => { return Math.abs(b.slope) - Math.abs(a.slope); });
+    quad2.sort((a,b) => { return Math.abs(a.slope) - Math.abs(b.slope); });
+    quad3.sort((a,b) => { return Math.abs(b.slope) - Math.abs(a.slope); });
+    quad4.sort((a,b) => { return Math.abs(a.slope) - Math.abs(b.slope); });
+    laserit = [quad1, quad2, quad3, quad4];
+    return laserit.flat();
 }
 
 console.log(base.slopemap.size);
