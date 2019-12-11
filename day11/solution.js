@@ -5,7 +5,7 @@ let programpointer = 0;
 let panels = new Map();
 //init with 0,0
 let loc = buildnewpanel(0,0);
-loc.color = "#";
+loc.color = ".";
 let dirs = ["^",">","v","<"];
 panels.set(loc.key, loc);
 
@@ -19,33 +19,20 @@ let ymax = 0;
 
 while(true) {
     //run the program and get the output
-    let out = runprog(robot.program, [robot.currentloc.color === "." ? 0 : 1], programpointer);
-    programpointer = out.pointer;
-    if(out.output === "HALT" || out.output === "DONE") {
-        //console.log(out);
-        programpointer = 0;
-        break;
-    }
-    
+    let outs = runprog(robot.program, [robot.currentloc.color === "." ? 0 : 1], programpointer, 2);
+    if(outs.length !== 2) break;
+    programpointer = outs[1].pointer;
+        
     //if 0, paint it black, if 1 paint it white
     let currentcolor = robot.currentloc.color;
-    if(out.output === 0) {
+    if(outs[0].output === 0) {
         robot.currentloc.color = "."
     } else robot.currentloc.color = "#";
     if (robot.currentloc.color !== currentcolor) robot.currentloc.painted = true;;
-    
 
-    //move the dummy
-    let out2 = runprog(robot.program, [robot.currentloc.color === "." ? 0 : 1], programpointer);
-    programpointer = out2.pointer;
-    if(out2.output === "HALT") {
-        //console.log(out);
-        programpointer = 0;
-        break;
-    }
     //0 turn left, 1 turn right
     let curindex = dirs.indexOf(robot.facing);
-    if(out2.output === 0) {
+    if(outs[1].output === 0) {
         curindex--;
         if (curindex === -1) curindex = 3;
     } else {
@@ -108,11 +95,12 @@ function buildnewpanel(x,y) {
     return {"key":`${x},${y}`, "x":x, "y":y, "color":'.', "painted": false};
 }
 
-function runprog(program, inputs, programpointer) {
+function runprog(program, inputs, programpointer, outs) {
     let inputpointer = 0;
     let terminate = false;
     let relativebase = 0;
     let loops = 0;
+    let rout = [];
     for(var i = programpointer; i < program.length && !terminate;) {
         //console.log(loops);
         let instruction = program[i].toString();
@@ -174,8 +162,7 @@ function runprog(program, inputs, programpointer) {
                 param1 = program[++i];
                 param1v = getvalue(param1mode, param1, program, relativebase);
                 i++;
-                console.log({"output": param1v, "pointer": i});
-                return {"output": param1v, "pointer": i};
+                rout.push({"output": param1v, "pointer": i});
                 break;
             case 5:
                 //if the first parameter is non-zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing
@@ -237,9 +224,11 @@ function runprog(program, inputs, programpointer) {
             case 99:
                 terminate = true;
                 //console.log("HALT");
+                //rout.push({"output": "HALT", "pointer": i});
                 return {"output": "HALT", "pointer": i};
                 break;
         }
+        if(rout.length === outs) return rout;
 
     }
 
