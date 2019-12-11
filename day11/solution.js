@@ -102,7 +102,7 @@ function runprog(program, inputs, programpointer, outs) {
     let loops = 0;
     let rout = [];
     for(var i = programpointer; i < program.length && !terminate;) {
-        console.log(++loops);
+        console.log(`${++loops}, ${i}`);
         let instruction = program[i].toString();
         //ABCDE - DE is 2 digit Opscode, C is mode of 1st param, B mode of 2nd param, A mode 3rd param
         //add 0's until it is 5 digits
@@ -168,6 +168,7 @@ function runprog(program, inputs, programpointer, outs) {
                 param1 = program[++i];
                 param1v = getvalue(param1mode, param1, program, relativebase);
                 i++;
+                console.log({"output": param1v, "pointer": i});
                 rout.push({"output": param1v, "pointer": i});
                 break;
             case 5:
