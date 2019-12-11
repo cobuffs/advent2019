@@ -5,7 +5,7 @@ let programpointer = 0;
 let panels = new Map();
 //init with 0,0
 let loc = buildnewpanel(0,0);
-loc.color = ".";
+loc.color = "#";
 let dirs = ["^",">","v","<"];
 panels.set(loc.key, loc);
 
@@ -102,7 +102,7 @@ function runprog(program, inputs, programpointer, outs) {
     let loops = 0;
     let rout = [];
     for(var i = programpointer; i < program.length && !terminate;) {
-        //console.log(loops);
+        console.log(++loops);
         let instruction = program[i].toString();
         //ABCDE - DE is 2 digit Opscode, C is mode of 1st param, B mode of 2nd param, A mode 3rd param
         //add 0's until it is 5 digits
@@ -124,7 +124,10 @@ function runprog(program, inputs, programpointer, outs) {
                 param2v = getvalue(param2mode, param2, program, relativebase);
                 sum = param1v + param2v;
                 param3 = program[++i];
-                if(param3mode === 1) program[param3] = sum;
+                if(param3mode === 1) {
+                    if(param3 >= program.length) growprogram(program, param3);
+                    program[param3] = sum;
+                }
                 else program[getindex(param3mode, param3, program, relativebase)] = sum;
                 i++;
                 break;
@@ -136,7 +139,10 @@ function runprog(program, inputs, programpointer, outs) {
                 param2v = getvalue(param2mode, param2, program, relativebase);
                 product = param1v * param2v;
                 param3 = program[++i];
-                if(param3mode === 1) program[param3] = product;
+                if(param3mode === 1) {
+                    if(param3 >= program.length) growprogram(program, param3);
+                    program[param3] = product;
+                }
                 else program[getindex(param3mode, param3, program, relativebase)] = product;
                 i++;
                 break;
@@ -145,13 +151,13 @@ function runprog(program, inputs, programpointer, outs) {
                 param1 = program[++i];
                 switch(param1mode) {
                     case 0:
-                        if(param1 > program.length) growprogram(program, param1);
+                        if(param1 >= program.length) growprogram(program, param1);
                         program[param1]  = inputs[inputpointer++];
                         break;
                     case 1:
                         break;
                     case 2:
-                        if((relativebase + param1) > program.length) growprogram(program, (relativebase + param1));
+                        if((relativebase + param1) >= program.length) growprogram(program, (relativebase + param1));
                         program[param1 + relativebase] = inputs[inputpointer++];
                         break;
                 }
@@ -189,7 +195,10 @@ function runprog(program, inputs, programpointer, outs) {
                 param2 = program[++i];
                 param2v = getvalue(param2mode, param2, program, relativebase);
                 param3 = program[++i];
-                if(param3mode === 1) program[param3] = param1v < param2v ? 1 : 0;
+                if(param3mode === 1) {
+                    if(param3 >= program.length) growprogram(program, param3);
+                    program[param3] = param1v < param2v ? 1 : 0;
+                }
                 else program[getindex(param3mode, param3, program, relativebase)] = param1v < param2v ? 1 : 0;
                 i++;
                 break;
@@ -199,7 +208,10 @@ function runprog(program, inputs, programpointer, outs) {
                 param2 = program[++i];
                 param2v = getvalue(param2mode, param2, program, relativebase);
                 param3 = program[++i];
-                if(param3mode === 1) program[param3] = param1v === param2v ? 1 : 0;  
+                if(param3mode === 1) {
+                    if(param3 >= program.length) growprogram(program, param3);
+                    program[param3] = param1v === param2v ? 1 : 0; 
+                }
                 else program[getindex(param3mode, param3, program, relativebase)] = param1v === param2v ? 1 : 0; 
                 i++;
                 break;
@@ -208,14 +220,14 @@ function runprog(program, inputs, programpointer, outs) {
                 param1 = program[++i];
                 switch(param1mode) {
                     case 0:
-                        if(param1 > program.length) growprogram(program, param1);
+                        if(param1 >= program.length) growprogram(program, param1);
                         relativebase += program[param1];
                         break;
                     case 1:
                         relativebase += param1;
                         break;
                     case 2:
-                        if((relativebase + param1) > program.length) growprogram(program, (relativebase + param1));
+                        if((relativebase + param1) >= program.length) growprogram(program, (relativebase + param1));
                         relativebase += program[(relativebase + param1)];
                         break;
                 }
@@ -231,19 +243,18 @@ function runprog(program, inputs, programpointer, outs) {
         if(rout.length === outs) return rout;
 
     }
-
     return {"output": "DONE", "pointer": 0};
 }
 
 function getvalue(parammode, param, program, relativebase) {
     switch(parammode) {
         case 0:
-            if(param > program.length) growprogram(program, param);
+            if(param >= program.length) growprogram(program, param);
             return program[param];
         case 1:
             return param;
         case 2:
-            if((relativebase + param) > program.length) growprogram(program, (relativebase + param));
+            if((relativebase + param) >= program.length) growprogram(program, (relativebase + param));
             return program[relativebase + param];
     }
 }
@@ -251,18 +262,18 @@ function getvalue(parammode, param, program, relativebase) {
 function getindex(parammode, param, program, relativebase) {
     switch(parammode) {
         case 0:
-            if(param > program.length) growprogram(program, param);
+            if(param >= program.length) growprogram(program, param);
             return param;
         case 1:
             return param;
         case 2:
-            if((relativebase + param) > program.length) growprogram(program, (relativebase + param));
+            if((relativebase + param) >= program.length) growprogram(program, (relativebase + param));
             return relativebase + param;
     }
 }
 
 function growprogram(program, newindex) {
-    for(var i = program.length; i <= newindex; i++) {
+    for(var i = program.length; i <= newindex+10; i++) {
         program.push(0);
     }
     return program;
