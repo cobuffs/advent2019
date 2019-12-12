@@ -2,10 +2,6 @@ let moons = [buildmoon("Io",1,2,-9), buildmoon("Europa",-1,-9,-4), buildmoon("Ga
 //let moons = [buildmoon("Io",-1,0,2), buildmoon("Europa",2,-10,-7), buildmoon("Ganymede",4,-8,8), buildmoon("Callisto",3,5,-1)];
 //let previousposmap = new Map();
 
-let xmap = new Map();
-let ymap = new Map();
-let zmap = new Map();
-
 for(var i = 0;i < moons.length; i++) {
     calcenergy(moons[i]);
 }
@@ -16,24 +12,10 @@ while(true) {
     applygravity();
     applyvelocity();
     steps++;
-    //add to map and check for termination
-    let key = "";
-    for(var i = 0; i < moons.length; i++) {
-        let moon = moons[i];
-        key += `${moon.x},${moon.y},${moon.z}`
-        if(i < moons.length - 1) key+=",";
-    }
-    if(previousposmap.has(key)) {
-        console.log(`took ${steps} steps`);
-        break;
-    } else {
-        previousposmap.set(key, true);
-    }
-    //if(steps % 100000 === 0) console.log(key);
+
 }
 
-console.log(calctotalenergy());
-//233444 - not correct
+//console.log(calctotalenergy());
 
 function applygravity() {
     //for each pair of moons, update the velocities
@@ -77,6 +59,7 @@ function applyvelocity() {
         moon.z += moon.vz;
         //console.log(`pos=<x= ${moon.x}, y=${moon.y}, z=${moon.z}>, vel=<x= ${moon.vx}, y=${moon.vy}, z=${moon.vz}>`);
         calcenergy(moon);
+
     }
 }
 
