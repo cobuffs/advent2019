@@ -1,10 +1,8 @@
 let moons = [buildmoon("Io",1,2,-9), buildmoon("Europa",-1,-9,-4), buildmoon("Ganymede",17,6,8), buildmoon("Callisto",12,4,2)];
 //let moons = [buildmoon("Io",-1,0,2), buildmoon("Europa",2,-10,-7), buildmoon("Ganymede",4,-8,8), buildmoon("Callisto",3,5,-1)];
 //let previousposmap = new Map();
-let moon0map = new Map();
-let moon1map = new Map();
-let moon2map = new Map();
-let moon3map = new Map();
+let moonmap = new Map();
+
 
 for(var i = 0;i < moons.length; i++) {
     calcenergy(moons[i]);
@@ -12,7 +10,7 @@ for(var i = 0;i < moons.length; i++) {
 
 //sim 1000 times for p1
 let steps = 0;
-while(steps < 6000000) {
+while(steps < 1000000) {
     applygravity();
     applyvelocity();
     steps++;
@@ -22,41 +20,22 @@ while(steps < 6000000) {
     let moon2 = moons[2];
     let moon3 = moons[3];
 
-    let moon0key = `${moon0.x},${moon0.y},${moon0.z}`;
-    let moon1key = `${moon1.x},${moon1.y},${moon1.z}`;
-    let moon2key = `${moon2.x},${moon2.y},${moon2.z}`;
-    let moon3key = `${moon3.x},${moon3.y},${moon3.z}`;
+    //caculated p2 by hand.
+    // 1. analyze output to find how many steps it takes to repeat a given point
+    // 2. for each step identified in 1. for each point, find LCM
+    // 3. notice 1 is the same for each moon
+    
+    let moonkey = `${moon1.x}`;
+    //let moon1key = `${moon1.x},${moon1.y},${moon1.z}`;
+    //let moon2key = `${moon2.x},${moon2.y},${moon2.z}`;
+    //let moon3key = `${moon3.x},${moon3.y},${moon3.z}`;
 
-    let moon0c = false;
-    let moon1c = false;
-    let moon2c = false;
-    let moon3c = false;
+    //look for x patterns
+    if(moonmap.has(moonkey)){
 
-    if(moon0map.has(moon0key)){
-        //91054
-        //console.log(`collision of 0 at ${steps}`);
-        moon0c = true;
-    } else moon0map.set(moon0key,true);
+        console.log(`key: ${moonkey}`);
+    } else moonmap.set(moonkey,true);
 
-    if(moon1map.has(moon1key)){
-        console.log(`collision of 1 at ${steps}`);
-        moon1c = true;
-    } else moon1map.set(moon1key,true);
-
-    if(moon2map.has(moon2key)){
-        //console.log(`collision of 2 at ${steps}`);
-        moon2c = true;
-    } else moon2map.set(moon2key,true);
-
-    if(moon3map.has(moon3key)){
-        //console.log(`collision of 3 at ${steps}`);
-        moon3c = true;
-    } else moon3map.set(moon3key,true);
-
-    if(moon0c && moon1c && moon2c && moon3c) {
-        console.log(steps);
-        break;
-    }
 }
 
 //console.log(calctotalenergy());
