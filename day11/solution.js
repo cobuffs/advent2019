@@ -120,9 +120,7 @@ function runprog(program, inputs, programpointer, outs, relativebase) {
         let param1mode = parseInt(instruction.substring(2,3),10);
         let param2mode = parseInt(instruction.substring(1,2),10);
         let param3mode = parseInt(instruction.substring(0,1),10);
-        console.log(`i:${i}, OpCode:${opscode}, pmode1:${param1mode}, pmode2:${param2mode}, pmode3:${param3mode}`);
         
-
         switch(opscode) {
             case 1:
                 //Opcode 1 adds together numbers read from two positions and stores the result in a third position
@@ -189,7 +187,6 @@ function runprog(program, inputs, programpointer, outs, relativebase) {
                 if(param1v !== 0) i = param2v;
                 else i++;
                 if(i >= program.length) growprogram(program, i);
-                console.log(`i after 5: ${i}, param2m: ${param2mode}, param2: ${param2}, relativebase: ${relativebase}`, );
                 break;
             case 6:
                 //if the first parameter is zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
@@ -230,7 +227,6 @@ function runprog(program, inputs, programpointer, outs, relativebase) {
             case 9:
                 //opcode 9 adjusts the relative base by the value of its only parameter. The relative base increases (or decreases, if the value is negative) by the value of the parameter.
                 param1 = accessinstruction(program, ++i);
-                console.log(`i before 9: ${i}, param1m: ${param1mode}, param1: ${param1}, relativebase: ${relativebase}`);
                 
                 switch(param1mode) {
                     case 0:
@@ -246,7 +242,6 @@ function runprog(program, inputs, programpointer, outs, relativebase) {
                         break;
                 }
                 i++;
-                console.log(`i after 9: ${i}, param1m: ${param1mode}, param1: ${param1}, relativebase: ${relativebase}`);
                 break;
             case 99:
                 terminate = true;
@@ -297,9 +292,7 @@ function getindex(parammode, param, program, relativebase) {
 }
 
 function growprogram(program, newindex) {
-    console.log(`growing to ${newindex}`);
     for(var i = program.length; i <= newindex; i++) {
         program.push(0);
     }
-    //return program;
 }
