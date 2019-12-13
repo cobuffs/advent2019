@@ -66,7 +66,7 @@ function geticonforid(id,x,y) {
         case 0:
             return " ";
         case 1:
-            if(x === 0) return "|";
+            if(x === 0 || x === boardarray[0].length - 1) return "|";
             else return "¯";
         case 2:
             return "#";
