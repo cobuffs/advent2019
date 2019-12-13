@@ -7,13 +7,17 @@ let boardarray = new Array(24);
 let balltile = null;
 let paddletile = null;
 let currentboard = "";
+let score = 0;
 
 for(var i = 0; i < boardarray.length; i++) {
     boardarray[i] = new Array();
 }
 
 let blockcount = 0;
+let frames = 0
 while(true) {
+    frames++;
+    if(frames >= (boardarray.length * boardarray[0].length)) printboard();
     inputs = getinputforstep();
     let output = runprog(program, inputs, programpointer, outs, relativebase);
     if(output.length !== 3) {
@@ -21,7 +25,7 @@ while(true) {
         break;
     }
     if(output[0].output === -1 && output[1].output === 0) {
-        console.log(`SCORE: ${output[2].output}`);
+        score = output[2].output;
     } else {
         //its a tile
         addorupdatetile(output[0].output, output[1].output, output[2].output);
@@ -29,48 +33,17 @@ while(true) {
     if(output[2].output === 2) blockcount++;
     relativebase = output[2].relativebase;
     programpointer = output[2].pointer;
-    printboard();
 }
 
 function getinputforstep() {
     let output = [];
-    //4 choices for ball velocity 1,1 1,-1 -1,1 -1,-1
-    //not sure where the ball is yet
-    if(balltile === null) return [0];
-    if(paddletile === null) return [0];
-    
-    //if its dropping, can we get there?
-    if(balltile.vy === 1) {
-        //always moves diagonally
-        //how many steps away from the paddle is the ball?
-        let turnstocollision = paddletile.y - balltile.y;
 
-        let xposatcollision = (balltile.vx * (turnstocollision)) + balltile.x;
-
-        if(xposatcollision === 0 || xposatcollision === boardarray[0].length-1) console.log("IN A WALL?");
-        //if that is out of bounds for the array or in a wall, we need to adjust. walls are x=0 and x=board[0].length;
-        else if(xposatcollision < 1) {
-            //will bounce off and be positive
-            xposatcollision = Math.abs(xposatcollision);
-        }
-
-        if(xposatcollision >= boardarray[0].length) {
-            xposatcollision = boardarray[0].length - (xposatcollision - boardarray[0].length);
-        }
-
-        //how far away is the paddle from where the ball is going to come down?
-        let i = Math.abs(xposatcollision - paddletile.x);
-        if(i === 0) return [0];
-        while(i > 0) {
-            output.push(xposatcollision - paddletile.x > 0 ? 1 : -1);
-            i--;
-        }
-        return output;
-    } else {
-        //center it
-        if(paddletile.x > Math.floor(boardarray[0].length / 2)) return [-1];
-        else return [1];
-    }
+    if(balltile === null || paddletile === null) return [0];
+    if(frames <= (boardarray.length * boardarray[0].length)) return [0];
+    if(balltile.x === paddletile.x) return [0];
+    if(paddletile.x > balltile.x) return [-1];
+    if(paddletile.x < balltile.x) return [1];  
+    return output;
 }
 
 function addorupdatetile(x,y,id) {
@@ -107,9 +80,13 @@ function geticonforid(id,x,y) {
 function printboard() {
     currentboard = "";
     let out = "";
+    if(balltile !== null) {
+        out += `SCORE: ${score} Ball: ${balltile.x},${balltile.y},${balltile.vx},${balltile.vy} Paddle: ${paddletile.x}`;
+    }
+    
     for(var y = 0; y < boardarray.length; y++) {
         out += "\r\n";
-        for(var x = 0; x < boardarray.length; x++) {
+        for(var x = 0; x < boardarray[y].length; x++) {
             out += boardarray[y][x];
         }
     }
