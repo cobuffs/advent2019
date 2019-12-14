@@ -3,6 +3,7 @@ const inputs = fs.readFileSync('sample0.txt').toString().split("\n");
 
 let elementmap = new Map();
 let corecounts = new Map();
+let rawcounts = new Map();
 
 for(var i = 0; i < inputs.length; i++) {
     //split on the => to get the reaction
@@ -17,7 +18,8 @@ for(var i = 0; i < inputs.length; i++) {
         "element": element,
         "n": yieldq,
         "reaction": [],
-        "ore": null
+        "ore": null,
+        "total": 0
     };
 
     for(var j = 0; j < consumables.length; j++) {
@@ -26,16 +28,36 @@ for(var i = 0; i < inputs.length; i++) {
             value.ore = parseInt(consumable[0],10);
             corecounts.set(value.element,0);
         }
-        else value.reaction.push({"n":parseInt(consumable[0],10), "element":consumable[1]});
+        else {
+            value.reaction.push({"n":parseInt(consumable[0],10), "element":consumable[1]});
+        }
     }
-
     elementmap.set(value.element, value);
 
+}
+
+//go through every consumable and build a count of materials needed
+for (let [k, v] of elementmap) {
+    if(v.ore === null && v.reaction) {
+        for(var i = 0; i < v.reaction.length; i++){
+            let consumable = v.reaction[i];
+            let elemc = 0;
+            if(rawcounts.has(consumable.element)) {
+                elemc = rawcounts.get(consumable.element);
+                elemc += consumable.n;
+            } else {
+                elemc += consumable.n;
+            }
+            rawcounts.set(consumable.element, elemc);
+        }
+    }
 }
 
 //find what is required to make fueld and get the number of ore
 //want to flatten into an array of {quantities, element}
 let fuel = elementmap.get("FUEL");
+//seems like we need to stage them somehow to be more efficient later. queue up all reactions for a particular element and do them all at once. 
+//basically break down everything into raw materials
 let flattenedcalc = tocores(1,"FUEL");
 
 //now we have the required core elements. need to understand their production
@@ -48,6 +70,10 @@ for (let [k, v] of corecounts) {
     orereq += (newsum / coreelement.n) * coreelement.ore;
 }
 console.log(`ORE: ${orereq}`);
+
+function stagereactions(depth, elementk) {
+
+}
 
 function tocores(depth, elementk) {
     let element = elementmap.get(elementk);
