@@ -1,5 +1,5 @@
 const fs = require('fs');
-const inputs = fs.readFileSync('sample1.txt').toString().split("\r\n");
+const inputs = fs.readFileSync('sample0.txt').toString().split("\n");
 
 let elementmap = new Map();
 
@@ -33,17 +33,20 @@ for(var i = 0; i < inputs.length; i++) {
 //want to flatten into an array of {quantities, element}
 let fuel = elementmap.get("FUEL");
 let fuelcalc = [];
-for(var i = 0; i < fuel.reaction.length; i++) {
-    //need to keep going until we get to an ore total
-}
+let flattenedcalc = getcalcforelement(1,"FUEL");
+console.log("done");
 
-
-function getcalcforelement(elementk) {
+function getcalcforelement(n, elementk) {
     let element = elementmap.get(elementk);
+    if(!elementmap.has(elementk)) console.log(`${elementk} doesn't exist`);
     let formula = [];
     //base case tells us for n ore, we get x of an element
-    if(element.ore !== null) return formula.push({"nore":element.ore, "yields":element.n});
-    for(var i = 0; i < element.reaction.length; i++) {
-        formula.push(getcalcforelement(element.reaction.element));
+    if(element.ore !== null) {
+        //console.log(`core element found: ${element.ore} ore yields ${element.n} of ${element.element}`);
+        return {"baseelement":element.element, "nore":element.ore, "yields":element.n};
     }
+    for(var i = 0; i < element.reaction.length; i++) {
+        formula.push({"n": element.reaction[i].n, "element": getcalcforelement(element.reaction[i].n, element.reaction[i].element) });
+    }
+    return formula;
 }
