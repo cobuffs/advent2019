@@ -238,7 +238,6 @@ function runprog(program, inputs, programpointer, outs, relativebase) {
             case 99:
                 terminate = true;
                 console.log("HALT");
-                console.log(rout);
                 rout.push({"output": "HALT", "pointer": i, "relativebase": relativebase});
                 return rout;
                 break;
