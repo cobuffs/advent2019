@@ -22,6 +22,8 @@ let choices = [];
 let moves = [];
 board.set(cursq.key, cursq);
 locstovisit.push(cursq);
+spacesthatneedo2.set(cursq.key, cursq);
+let ogloc = cursq;
 
 //need to find the oxygen unit
 while(locstovisit.length != 0 || moves.length == 0) {
@@ -125,6 +127,7 @@ function getdistancesfromo2() {
     let spacestofillwithair = [];
     let maxdis = 1;
     let depth = 1;
+    let mindis = 10000;
     //find valid spaces adjacent
     //N
     if(spacesthatneedo2.has(`${o2loc.x},${o2loc.y+1}`)){
@@ -147,6 +150,9 @@ function getdistancesfromo2() {
         let roomtofill = spacestofillwithair.pop();
         if(spacesthatneedo2.has(roomtofill.key)){
             if(roomtofill.distance > maxdis) maxdis = roomtofill.distance;
+            if(roomtofill.x === ogloc.x && roomtofill.y === ogloc.y) {
+                mindis = roomtofill.distance;
+            }
             let newdepth = roomtofill.distance + 1;
             spacesthatneedo2.delete(roomtofill.key);
             //N
@@ -167,7 +173,8 @@ function getdistancesfromo2() {
             }
         }
     }
-    console.log(maxdis);
+    console.log(`Minutes to fill: ${maxdis}`);
+    console.log(`Distance to OG: ${mindis}`);
 }
 
 printboard();
