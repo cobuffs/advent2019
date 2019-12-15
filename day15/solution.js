@@ -5,6 +5,7 @@ let inputs = [1];
 let relativebase = 0;
 
 let board = new Map();
+let spacesthatneedo2 =new Map();
 let curx = 0;
 let cury = 0;
 let tryx = curx;
@@ -13,54 +14,204 @@ let minx = 0;
 let maxx = 0;
 let miny = 0;
 let maxy = 0;
+let o2loc = null;
 
 let cursq = buildsquare(curx, cury, "O");
+let locstovisit = [];
+let choices = [];
+let moves = [];
 board.set(cursq.key, cursq);
+locstovisit.push(cursq);
 
 //need to find the oxygen unit
-while(true) {
-    inputs = [getdirection()];
-    let output = runprog(program, inputs, programpointer, outs, relativebase);
-    programpointer = output[0].pointer;
-    relativebase = output[0].relativebase;
-    let result = output[0].output;
-    console.log(`trying ${inputs[0]} and got ${result}`);
+while(locstovisit.length != 0 || moves.length == 0) {
+    //every time we are at a space, look at all adjacent spaces
+    locstovisit.pop();
+    cursq = board.get(`${curx},${cury}`);
+    if(!cursq.mapped) {
+        //maps it
+        //N
+        if(!board.has(`${curx},${cury+1}`)){
+            let result = doit(1);
+            let newsq = buildsquare(curx, cury+1, result);
+            board.set(newsq.key, newsq);
+            if(newsq.type !== 0) {
+                locstovisit.push(newsq);
+                doit(2);
+            }
+        }
+        //S
+        if(!board.has(`${curx},${cury-1}`)){
+            let result = doit(2);
+            let newsq = buildsquare(curx, cury-1, result);
+            board.set(newsq.key, newsq);
+            if(newsq.type !== 0) {
+                locstovisit.push(newsq);
+                doit(1);
+            }
+        }
+        //W
+        if(!board.has(`${curx-1},${cury}`)){
+            let result = doit(3);   
+            let newsq = buildsquare(curx-1, cury, result);
+            board.set(newsq.key, newsq);
+            if(newsq.type !== 0) {
+                locstovisit.push(newsq);
+                doit(4);
+            }
+        }
+        //E
+        if(!board.has(`${curx+1},${cury}`)){            
+            let result = doit(4);   
+            let newsq = buildsquare(curx+1, cury, result);
+            board.set(newsq.key, newsq);
+            if(newsq.type !== 0) {
+                locstovisit.push(newsq);
+                doit(3);
+            }
+        }
+        cursq.mapped = true;
+        console.log(`Mapped ${cursq.x},${cursq.y}`);
+    }
+    //actually move now
+    //let sqtomoveto = locstovisit[locstovisit.length-1];
+    let sqtomoveto = null;
+    if(locstovisit.length === 0) break;
+    else sqtomoveto = locstovisit[locstovisit.length-1];
+    //need to pop and move until we hit one of our unmapped squares
+    //check if its in our range
+
+    while(!isinrange(sqtomoveto)) {
+        let previous = moves.pop();
+        let dir = getdirectionbackup(previous);
+        console.log(`trying to get to ${sqtomoveto.x}, ${sqtomoveto.y} from ${curx},${cury} dir: ${previous}`);
+        let result = doit(dir);
+        if (result === "HALT") {
+            console.log(`Uh oh: trying to get to ${sqtomoveto.x}, ${sqtomoveto.y} from ${curx},${cury} dir: ${previous}`);
+            break;
+        }
+        else move();
+        console.log(`Moved to ${curx},${cury}`);
+    }
+    let result = doit(getdirectionwithaudit(sqtomoveto));
+
     if(miny > tryy) miny = tryy;
     if(maxy < tryy) maxy = tryy;
     if(minx > tryx) minx = tryx;
     if(maxx < tryx) maxx = tryx;
+    
     if(result === "HALT") break;
     if(result === 0) {
         //hit a wall
-        let newsq = buildsquare(tryx, tryy, "#");
-        board.set(newsq.key,newsq);
+        console.log("Should never happen");
         reset();
     }
     else if(result === 1) {
         move();
-        let newsq = buildsquare(curx, cury, ".");
-        board.set(newsq.key,newsq);
+        spacesthatneedo2.set(`${curx},${cury}`, {"x":curx,"y":cury});
     } else {
         //Unit found!
+        o2loc = sqtomoveto;
+        spacesthatneedo2.delete(`${o2loc.x},${o2loc.y}`);
         move();
-        let newsq = buildsquare(curx, cury, "X");
-        board.set(newsq.key,newsq);
-        console.log(newsq);
-        break;
     }
+    console.log(`Moved to ${curx},${cury}`);
 }
 
-//found unit
+//at this point i have the entire ship mapped out - need to calculate the distance from the 02 sensor for every point and take the max
+function getdistancesfromo2() {
+    let start = o2loc;
+    //fill in all adjacents with O2 and track valid moves
+    let spacestofillwithair = [];
+    let maxdis = 1;
+    let depth = 1;
+    //find valid spaces adjacent
+    //N
+    if(spacesthatneedo2.has(`${o2loc.x},${o2loc.y+1}`)){
+        spacestofillwithair.push({"x":o2loc.x, "y":o2loc.y+1, "distance": depth, "key": `${o2loc.x},${o2loc.y+1}`});
+    }
+    //S
+    if(spacesthatneedo2.has(`${o2loc.x},${o2loc.y-1}`)){
+        spacestofillwithair.push({"x":o2loc.x, "y":o2loc.y-1, "distance": depth, "key": `${o2loc.x},${o2loc.y-1}`});
+    }
+    //W
+    if(spacesthatneedo2.has(`${o2loc.x-1},${o2loc.y}`)){
+        spacestofillwithair.push({"x":o2loc.x-1, "y":o2loc.y, "distance": depth, "key": `${o2loc.x-1},${o2loc.y}`});
+    }
+    //E
+    if(spacesthatneedo2.has(`${o2loc.x+1},${o2loc.y}`)){
+        spacestofillwithair.push({"x":o2loc.x+1, "y":o2loc.y, "distance": depth, "key": `${o2loc.x+1},${o2loc.y}`});
+    }
+    while(spacestofillwithair.length > 0) {
+        //pop, make sure it still needs it, and fill it
+        let roomtofill = spacestofillwithair.pop();
+        if(spacesthatneedo2.has(roomtofill.key)){
+            if(roomtofill.distance > maxdis) maxdis = roomtofill.distance;
+            let newdepth = roomtofill.distance + 1;
+            spacesthatneedo2.delete(roomtofill.key);
+            //N
+            if(spacesthatneedo2.has(`${roomtofill.x},${roomtofill.y+1}`)){
+                spacestofillwithair.push({"x":roomtofill.x, "y":roomtofill.y+1, "distance": newdepth, "key": `${roomtofill.x},${roomtofill.y+1}`});
+            }
+            //S
+            if(spacesthatneedo2.has(`${roomtofill.x},${roomtofill.y-1}`)){
+                spacestofillwithair.push({"x":roomtofill.x, "y":roomtofill.y-1, "distance": newdepth, "key": `${roomtofill.x},${roomtofill.y-1}`});
+            }
+            //W
+            if(spacesthatneedo2.has(`${roomtofill.x-1},${roomtofill.y}`)){
+                spacestofillwithair.push({"x":roomtofill.x-1, "y":roomtofill.y, "distance": newdepth, "key": `${roomtofill.x-1},${roomtofill.y}`});
+            }
+            //E
+            if(spacesthatneedo2.has(`${roomtofill.x+1},${roomtofill.y}`)){
+                spacestofillwithair.push({"x":roomtofill.x+1, "y":roomtofill.y, "distance": newdepth, "key": `${roomtofill.x+1},${roomtofill.y}`});
+            }
+        }
+    }
+    console.log(maxdis);
+}
+
 printboard();
+console.log(o2loc);
+getdistancesfromo2();
 //get minx,miny,maxx,maxy;
+
+function isinrange(square) {
+    if(Math.abs(square.x - curx) > 1) return false;
+    if(Math.abs(square.y - cury) > 1) return false;
+    if(Math.abs(square.y - cury) === 1 && Math.abs(square.x - curx) === 1) return false;
+    return true;
+}
+
+function doit(dir) {
+    //move movement into here at some point
+    let output = runprog(program, [dir], programpointer, outs, relativebase);
+    programpointer = output[0].pointer;
+    relativebase = output[0].relativebase;
+    let result = output[0].output;
+    return result;
+}
 
 function printboard() {
     let str = "";
-    for(var i = maxy; i >= miny; i--){ 
+    for(var i = maxy+1; i >= miny-1; i--){ 
         str += "\r\n"
-        for(var j = minx; j <= maxx; j++) {
+        for(var j = minx-1; j <= maxx+1; j++) {
             let sq = board.get(`${j},${i}`);
-            str += !board.has(`${j},${i}`) ? " " : sq.type;
+            let chartoprint = " ";
+            if(board.has(`${j},${i}`)){
+                switch(sq.type) {
+                    case 0: 
+                        chartoprint = "#";
+                        break;
+                    case 1:
+                        chartoprint = ".";
+                        break;
+                    case 2:
+                        chartoprint = "X";
+                        break;
+                }
+            }
+            str += chartoprint;
         }
     }
     console.log(str);
@@ -69,6 +220,7 @@ function printboard() {
 function move() {
     curx = tryx;
     cury = tryy;
+    
 }
 
 function reset() {
@@ -76,27 +228,64 @@ function reset() {
     tryy = cury;
 }
 
-function getdirection() {
-    if(!board.has(`${curx},${cury+1}`)) {
-        tryy++;
-        return 1;
-    }
-    if(!board.has(`${curx+1},${cury}`)) {
-        tryx++;
-        return 4;
-    }
-    if(!board.has(`${curx-1},${cury}`)) {
-        tryx--;
-        return 3;
-    }
-    if(!board.has(`${curx},${cury-1}`)) {
-        tryy--;
-        return 2;
+function getdirectionbackup(odir) {
+    switch(odir) {
+        case 1:
+            tryy--;
+            return 2;
+        case 2:
+            tryy++;
+            return 1;
+        case 3:
+            tryx++;
+            return 4;
+        case 4:
+            tryx--;
+            return 3;
     }
 }
 
+function getdirectionwithaudit(destination) {
+    if(destination.y > cury) {
+        tryy++;
+        moves.push(1);
+        return 1;
+    }
+    if(destination.y < cury) {
+        tryy--;
+        moves.push(2);
+        return 2;
+    }
+    if(destination.x < curx) {
+        tryx--;
+        moves.push(3);
+        return 3;
+    }
+    if(destination.x > curx) {
+        tryx++;
+        moves.push(4);
+        return 4;
+    }
+    // if(!board.has(`${curx},${cury+1}`)) {
+    //     tryy++;
+    //     return 1;
+    // }
+    // if(!board.has(`${curx+1},${cury}`)) {
+    //     tryx++;
+    //     return 4;
+    // }
+    // if(!board.has(`${curx-1},${cury}`)) {
+    //     tryx--;
+    //     return 3;
+    // }
+    // if(!board.has(`${curx},${cury-1}`)) {
+    //     tryy--;
+    //     return 2;
+    // }
+}
+
 function buildsquare(x,y,type) {
-    return {"x":x, "y": y, "type":type, "key": `${x},${y}`};
+    return {"x":x, "y": y, "type":type, "key": `${x},${y}`, "mapped": false, "o2": false};
 }
 
 function runprog(program, inputs, programpointer, outs, relativebase) {
