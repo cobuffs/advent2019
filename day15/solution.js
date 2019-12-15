@@ -115,7 +115,7 @@ while(locstovisit.length != 0 || moves.length == 0) {
         spacesthatneedo2.delete(`${o2loc.x},${o2loc.y}`);
         move();
     }
-    console.log(`Moved to ${curx},${cury}`);
+    //console.log(`Moved to ${curx},${cury}`);
 }
 
 //at this point i have the entire ship mapped out - need to calculate the distance from the 02 sensor for every point and take the max
