@@ -71,7 +71,7 @@ while(locstovisit.length != 0 || moves.length == 0) {
             }
         }
         cursq.mapped = true;
-        console.log(`Mapped ${cursq.x},${cursq.y}`);
+        //console.log(`Mapped ${cursq.x},${cursq.y}`);
     }
     //actually move now
     //let sqtomoveto = locstovisit[locstovisit.length-1];
@@ -84,14 +84,14 @@ while(locstovisit.length != 0 || moves.length == 0) {
     while(!isinrange(sqtomoveto)) {
         let previous = moves.pop();
         let dir = getdirectionbackup(previous);
-        console.log(`trying to get to ${sqtomoveto.x}, ${sqtomoveto.y} from ${curx},${cury} dir: ${previous}`);
+        //console.log(`trying to get to ${sqtomoveto.x}, ${sqtomoveto.y} from ${curx},${cury} dir: ${previous}`);
         let result = doit(dir);
         if (result === "HALT") {
             console.log(`Uh oh: trying to get to ${sqtomoveto.x}, ${sqtomoveto.y} from ${curx},${cury} dir: ${previous}`);
             break;
         }
         else move();
-        console.log(`Moved to ${curx},${cury}`);
+        //console.log(`Moved to ${curx},${cury}`);
     }
     let result = doit(getdirectionwithaudit(sqtomoveto));
 
